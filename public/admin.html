@@ -37,7 +37,7 @@ let PW=sessionStorage.getItem('kd_pw')||'',editId=null;
 $('cat').innerHTML=CATS.map(c=>`<option value="${c[0]}">${c[1]}</option>`).join('');
 const H=()=>({'x-admin-password':PW,'content-type':'application/json'});
 async function login(){PW=$('pw').value;const r=await(await fetch('/api/news?check=1',{headers:H()})).json();
-  if(r.ok){sessionStorage.setItem('kd_pw',PW);start()}else $('lm').textContent='ভুল পাসওয়ার্ড (বা ADMIN_PASSWORD সেট করা হয়নি)'}
+  if(r.ok){sessionStorage.setItem('kd_pw',PW);start()}else $('lm').textContent=r.envSet?'ভুল পাসওয়ার্ড':'সার্ভার ADMIN_PASSWORD পাচ্ছে না — Netlify-তে সেট করে আবার Deploy করুন'}
 async function start(){$('login').style.display='none';$('app').style.display='block';load()}
 const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 async function load(){const d=await(await fetch('/api/news')).json();d.sort((a,b)=>b.date.localeCompare(a.date));
