@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin | Khobordekho</title><meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--red:#8b0000;--bg:#f4f4f4;--card:#fff;--text:#1a1a1a;--line:#ddd}
+@media(prefers-color-scheme:dark){:root{--red:#b3121b;--bg:#121212;--card:#1c1c1c;--text:#f0f0f0;--line:#333}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:'Noto Sans Bengali',system-ui,sans-serif}
+header{background:var(--red);color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:700}
+.w{max-width:900px;margin:18px auto;padding:0 14px}.box{background:var(--card);border:1px solid var(--line);padding:16px;margin-bottom:18px}
+label{display:block;font-weight:600;margin:12px 0 4px;font-size:14px}
+input[type=text],input[type=password],select,textarea{width:100%;padding:9px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit;border-radius:4px}
+textarea{min-height:90px}.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:640px){.row{grid-template-columns:1fr}}
+button{background:var(--red);color:#fff;border:0;padding:9px 18px;border-radius:4px;font:inherit;font-weight:600;cursor:pointer}button.g{background:#666}button.d{background:#444;padding:5px 10px;font-size:13px}
+#pv{max-width:260px;margin-top:8px;display:none;border-radius:4px}
+.li{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}.li span{flex:1;font-weight:600}.li small{display:block;font-weight:400;opacity:.7}
+#msg{font-weight:600;margin-left:10px}
+</style></head><body>
+<header><span>খবরদেখো · Admin Panel</span><a href="/" style="color:#fff">← Site</a></header>
+<div class="w" id="login"><div class="box"><h3>লগইন</h3><label>Admin Password</label><input type="password" id="pw"><p><button onclick="login()">Login</button> <span id="lm"></span></p></div></div>
+<div class="w" id="app" style="display:none">
+<div class="box"><h3 id="ft">নতুন খবর যোগ করুন</h3>
+<div class="row"><div><label>সেকশন / Section</label><select id="cat"></select></div><div><label>&nbsp;</label><label><input type="checkbox" id="featured"> প্রধান খবর (Lead story)</label></div></div>
+<label>ছবি / Photo</label><input type="file" id="photo" accept="image/*"><img id="pv"><input type="hidden" id="image">
+<label>শিরোনাম (বাংলা) *</label><input type="text" id="title">
+<label>Headline (English) — optional</label><input type="text" id="title_en">
+<label>সংক্ষিপ্ত বিবরণ (বাংলা) *</label><textarea id="desc" style="min-height:60px"></textarea>
+<label>Short description (English) — optional</label><textarea id="desc_en" style="min-height:60px"></textarea>
+<label>পূর্ণ খবর / বিস্তারিত (বাংলা) — অনুচ্ছেদের মাঝে ফাঁকা লাইন দিন</label><textarea id="content" style="min-height:180px"></textarea>
+<label>Full story (English) — optional</label><textarea id="content_en" style="min-height:180px"></textarea>
+<p><button onclick="saveNews()" id="sv">প্রকাশ করুন</button> <button class="g" onclick="reset()">নতুন ফর্ম</button><span id="msg"></span></p></div>
+<div class="box"><h3>সব খবর</h3><div id="list"></div></div></div>
+<script>
+const CATS=[["bd","বাংলাদেশ"],["pol","রাজনীতি"],["world","আন্তর্জাতিক"],["eco","অর্থনীতি"],["sport","খেলা"],["ent","বিনোদন"],["tech","প্রযুক্তি"],["edu","শিক্ষা"],["op","মতামত"],["life","লাইফস্টাইল"]];
+const $=id=>document.getElementById(id),F=["cat","title","title_en","desc","desc_en","content","content_en","image"];
+let PW=sessionStorage.getItem('kd_pw')||'',editId=null;
+$('cat').innerHTML=CATS.map(c=>`<option value="${c[0]}">${c[1]}</option>`).join('');
+const H=()=>({'x-admin-password':PW,'content-type':'application/json'});
+async function login(){PW=$('pw').value;const r=await(await fetch('/api/news?check=1',{headers:H()})).json();
+  if(r.ok){sessionStorage.setItem('kd_pw',PW);start()}else $('lm').textContent='ভুল পাসওয়ার্ড (বা ADMIN_PASSWORD সেট করা হয়নি)'}
+async function start(){$('login').style.display='none';$('app').style.display='block';load()}
+const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function load(){const d=await(await fetch('/api/news')).json();d.sort((a,b)=>b.date.localeCompare(a.date));
+  $('list').innerHTML=d.map(a=>`<div class="li"><span>${esc(a.title)}${a.featured?' ⭐':''}<small>${CATS.find(c=>c[0]==a.cat)?.[1]||''} · ${new Date(a.date).toLocaleString('bn-BD')} · 👁 ${a.views||0}</small></span><button class="d" onclick="edit('${a.id}')">Edit</button><button class="d" onclick="del('${a.id}')">Delete</button></div>`).join('')||'<p>এখনো কোনো খবর নেই।</p>'}
+function resize(f){return new Promise(r=>{const i=new Image();i.onload=()=>{const s=Math.min(1,1200/i.width),c=document.createElement('canvas');c.width=i.width*s;c.height=i.height*s;c.getContext('2d').drawImage(i,0,0,c.width,c.height);c.toBlob(r,'image/jpeg',.82)};i.src=URL.createObjectURL(f)})}
+$('photo').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('msg').textContent='ছবি আপলোড হচ্ছে...';
+  const b=await resize(f),r=await fetch('/api/image',{method:'POST',headers:{'x-admin-password':PW},body:b});
+  if(r.ok){const j=await r.json();$('image').value=j.url;$('pv').src=j.url;$('pv').style.display='block';$('msg').textContent='ছবি আপলোড হয়েছে ✓'}else $('msg').textContent='ছবি আপলোড ব্যর্থ'};
+async function saveNews(){const b={featured:$('featured').checked};F.forEach(k=>b[k]=$(k).value.trim());
+  if(!b.title||!b.desc){$('msg').textContent='শিরোনাম ও বিবরণ দিন';return}
+  if(editId)b.id=editId;
+  const r=await fetch('/api/news',{method:editId?'PUT':'POST',headers:H(),body:JSON.stringify(b)});
+  if(r.ok){$('msg').textContent='প্রকাশিত হয়েছে ✓';reset(false);load()}else $('msg').textContent='ব্যর্থ — আবার লগইন করুন'}
+async function edit(id){const a=await(await fetch('/api/news?admin=1&id='+id)).json();editId=id;
+  F.forEach(k=>$(k).value=a[k]||'');$('featured').checked=!!a.featured;
+  $('pv').src=a.image||'';$('pv').style.display=a.image?'block':'none';$('ft').textContent='খবর সম্পাদনা';$('sv').textContent='আপডেট করুন';scrollTo(0,0)}
+async function del(id){if(!confirm('মুছে ফেলবেন?'))return;await fetch('/api/news?id='+id,{method:'DELETE',headers:H()});load()}
+function reset(c=true){editId=null;F.forEach(k=>$(k).value='');$('cat').value='bd';$('featured').checked=false;$('photo').value='';$('pv').style.display='none';$('ft').textContent='নতুন খবর যোগ করুন';$('sv').textContent='প্রকাশ করুন';if(c)$('msg').textContent=''}
+if(PW)fetch('/api/news?check=1',{headers:H()}).then(r=>r.json()).then(r=>r.ok&&start());
+</script></body></html>
