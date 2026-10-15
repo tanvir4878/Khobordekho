@@ -1,7 +1,7 @@
 import { getStore } from "@netlify/blobs";
 const store = () => getStore("khobordekho");
 const J = (d, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { "content-type": "application/json", "cache-control": "no-store" } });
-const auth = r => process.env.ADMIN_PASSWORD && r.headers.get("x-admin-password") === process.env.ADMIN_PASSWORD;
+const auth = r => { const p = (process.env.ADMIN_PASSWORD || "").trim(); return p && (r.headers.get("x-admin-password") || "").trim() === p; };
 const load = async () => (await store().get("articles", { type: "json" })) || [];
 const save = a => store().setJSON("articles", a);
 const FIELDS = ["cat","title","title_en","desc","desc_en","content","content_en","image","featured"];
@@ -12,7 +12,7 @@ export default async (req) => {
   const id = url.searchParams.get("id");
   let all = await load();
   if (req.method === "GET") {
-    if (url.searchParams.get("check")) return J({ ok: !!auth(req) });
+if (url.searchParams.get("check")) return J({ ok: !!auth(req), envSet: !!process.env.ADMIN_PASSWORD });
     if (id) {
       const a = all.find(x => x.id === id);
       if (!a) return J({ error: "not found" }, 404);
