@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin | Khobordekho</title><meta name="robots" content="noindex">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+<title>Admin | Khobordekho</title><link rel="icon" href="/favicon.png"><meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--red:#8b0000;--bg:#f4f4f4;--card:#fff;--text:#1a1a1a;--line:#ddd}
 @media(prefers-color-scheme:dark){:root{--red:#b3121b;--bg:#121212;--card:#1c1c1c;--text:#f0f0f0;--line:#333}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:'Noto Sans Bengali',system-ui,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:'Hind Siliguri',system-ui,sans-serif}
 header{background:var(--red);color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:700}
 .w{max-width:900px;margin:18px auto;padding:0 14px}.box{background:var(--card);border:1px solid var(--line);padding:16px;margin-bottom:18px}
 label{display:block;font-weight:600;margin:12px 0 4px;font-size:14px}
@@ -16,11 +16,14 @@ button{background:var(--red);color:#fff;border:0;padding:9px 18px;border-radius:
 .li{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}.li span{flex:1;font-weight:600}.li small{display:block;font-weight:400;opacity:.7}
 #msg{font-weight:600;margin-left:10px}
 </style></head><body>
-<header><span>খবরদেখো · Admin Panel</span><a href="/" style="color:#fff">← Site</a></header>
+<header><span style="display:flex;align-items:center;gap:10px"><img src="/logo.png" alt="" style="height:30px;filter:invert(1)"> Admin Panel</span><a href="/" style="color:#fff">← Site</a></header>
 <div class="w" id="login"><div class="box"><h3>লগইন</h3><label>Admin Password</label><input type="password" id="pw"><p><button onclick="login()">Login</button> <span id="lm"></span></p></div></div>
 <div class="w" id="app" style="display:none">
 <div class="box"><h3 id="ft">নতুন খবর যোগ করুন</h3>
 <div class="row"><div><label>সেকশন / Section</label><select id="cat"></select></div><div><label>&nbsp;</label><label><input type="checkbox" id="featured"> প্রধান খবর (Lead story)</label></div></div>
+<div id="jobf" style="display:none;border-left:5px solid var(--red);padding-left:12px;margin-top:12px"><b>💼 চাকরির তথ্য</b>
+<div class="row"><div><label>প্রতিষ্ঠানের নাম (বাংলা)</label><input type="text" id="company"></div><div><label>Company name (English)</label><input type="text" id="company_en"></div></div>
+<div class="row"><div><label>আবেদনের শেষ তারিখ</label><input type="date" id="deadline" style="width:100%;padding:9px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit;border-radius:4px"></div><div><label>আবেদনের লিংক (https://...)</label><input type="text" id="apply_url" placeholder="https://"></div></div></div>
 <label>ছবি / Photo</label><input type="file" id="photo" accept="image/*"><img id="pv"><input type="hidden" id="image">
 <label>শিরোনাম (বাংলা) *</label><input type="text" id="title">
 <label>Headline (English) — optional</label><input type="text" id="title_en">
@@ -31,8 +34,10 @@ button{background:var(--red);color:#fff;border:0;padding:9px 18px;border-radius:
 <p><button onclick="saveNews()" id="sv">প্রকাশ করুন</button> <button class="g" onclick="reset()">নতুন ফর্ম</button><span id="msg"></span></p></div>
 <div class="box"><h3>সব খবর</h3><div id="list"></div></div></div>
 <script>
-const CATS=[["bd","বাংলাদেশ"],["pol","রাজনীতি"],["world","আন্তর্জাতিক"],["eco","অর্থনীতি"],["sport","খেলা"],["ent","বিনোদন"],["tech","প্রযুক্তি"],["edu","শিক্ষা"],["op","মতামত"],["life","লাইফস্টাইল"]];
-const $=id=>document.getElementById(id),F=["cat","title","title_en","desc","desc_en","content","content_en","image"];
+const CATS=[["bd","বাংলাদেশ"],["pol","রাজনীতি"],["world","আন্তর্জাতিক"],["eco","অর্থনীতি"],["sport","খেলা"],["ent","বিনোদন"],["tech","প্রযুক্তি"],["edu","শিক্ষা"],["jobs","চাকরি"],["op","মতামত"],["life","লাইফস্টাইল"]];
+const $=id=>document.getElementById(id),F=["cat","title","title_en","desc","desc_en","content","content_en","image","company","company_en","deadline","apply_url"];
+function tj(){$('jobf').style.display=$('cat').value=='jobs'?'block':'none'}
+$('cat').onchange=tj;
 let PW=sessionStorage.getItem('kd_pw')||'',editId=null;
 $('cat').innerHTML=CATS.map(c=>`<option value="${c[0]}">${c[1]}</option>`).join('');
 const H=()=>({'x-admin-password':PW,'content-type':'application/json'});
@@ -52,9 +57,9 @@ async function saveNews(){const b={featured:$('featured').checked};F.forEach(k=>
   const r=await fetch('/api/news',{method:editId?'PUT':'POST',headers:H(),body:JSON.stringify(b)});
   if(r.ok){$('msg').textContent='প্রকাশিত হয়েছে ✓';reset(false);load()}else $('msg').textContent='ব্যর্থ — আবার লগইন করুন'}
 async function edit(id){const a=await(await fetch('/api/news?admin=1&id='+id)).json();editId=id;
-  F.forEach(k=>$(k).value=a[k]||'');$('featured').checked=!!a.featured;
+  F.forEach(k=>$(k).value=a[k]||'');$('featured').checked=!!a.featured;tj();
   $('pv').src=a.image||'';$('pv').style.display=a.image?'block':'none';$('ft').textContent='খবর সম্পাদনা';$('sv').textContent='আপডেট করুন';scrollTo(0,0)}
 async function del(id){if(!confirm('মুছে ফেলবেন?'))return;await fetch('/api/news?id='+id,{method:'DELETE',headers:H()});load()}
-function reset(c=true){editId=null;F.forEach(k=>$(k).value='');$('cat').value='bd';$('featured').checked=false;$('photo').value='';$('pv').style.display='none';$('ft').textContent='নতুন খবর যোগ করুন';$('sv').textContent='প্রকাশ করুন';if(c)$('msg').textContent=''}
+function reset(c=true){editId=null;F.forEach(k=>$(k).value='');$('cat').value='bd';$('featured').checked=false;$('photo').value='';$('pv').style.display='none';$('ft').textContent='নতুন খবর যোগ করুন';$('sv').textContent='প্রকাশ করুন';tj();if(c)$('msg').textContent=''}
 if(PW)fetch('/api/news?check=1',{headers:H()}).then(r=>r.json()).then(r=>r.ok&&start());
 </script></body></html>
