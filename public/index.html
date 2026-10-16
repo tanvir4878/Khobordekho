@@ -62,6 +62,7 @@ aside .box{background:var(--card);border-radius:14px;box-shadow:var(--sh);overfl
 .art .body p{font-size:19px;line-height:1.95;margin:0 0 18px}.art .lede{font-size:20px;color:var(--mut);font-weight:500;border-left:4px solid var(--red2);padding-left:14px;margin:0 0 18px}
 .share{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0;align-items:center}.share a,.share button{background:var(--red);color:#fff;border:0;border-radius:20px;padding:6px 16px;font:inherit;font-size:14px;cursor:pointer;font-weight:600}
 .back{color:var(--red2);font-weight:600;font-size:14px}
+.job{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13.5px;font-weight:600;margin:0 0 6px;color:var(--red2)}.jbox{background:var(--bg);border-left:5px solid var(--red2);border-radius:10px;padding:14px 16px;margin:0 0 20px;display:grid;gap:8px;font-size:17px}.apply{background:var(--red2);color:#fff;padding:10px 24px;border-radius:30px;font-weight:700;justify-self:start}.apply:hover{background:var(--red)}
 .empty{padding:50px 20px;text-align:center;color:var(--mut);background:var(--card);border-radius:12px;border:2px dashed var(--line)}
 .sk{background:linear-gradient(90deg,var(--line) 25%,var(--card) 50%,var(--line) 75%);background-size:200% 100%;animation:sh 1.2s infinite;border-radius:12px;height:260px;margin-bottom:16px}@keyframes sh{to{background-position:-200% 0}}
 footer{background:linear-gradient(160deg,#5c0000,var(--red));color:#fff;margin-top:36px;padding:30px 0 calc(18px + env(safe-area-inset-bottom))}
@@ -82,8 +83,8 @@ footer small{opacity:.8;display:block;border-top:1px solid rgba(255,255,255,.2);
 <footer><div class="wrap"><img class="logo" src="/logo.png" alt=""><div class="fl" id="fl"></div><small id="cp"></small></div></footer>
 <button id="up" aria-label="Top">↑</button>
 <script>
-const CATS=[["home","প্রচ্ছদ","Home"],["bd","বাংলাদেশ","Bangladesh"],["pol","রাজনীতি","Politics"],["world","আন্তর্জাতিক","International"],["eco","অর্থনীতি","Economy"],["sport","খেলা","Sports"],["ent","বিনোদন","Entertainment"],["tech","প্রযুক্তি","Technology"],["edu","শিক্ষা","Education"],["op","মতামত","Opinion"],["life","লাইফস্টাইল","Lifestyle"]];
-const S={tag:["সত্য ও নিরপেক্ষ সংবাদের বিশ্বস্ত ঠিকানা","Your trusted source for truthful news"],bk:["শিরোনাম","BREAKING"],t0:["সর্বশেষ","Latest"],t1:["জনপ্রিয়","Popular"],cp:["© খবরদেখো। সর্বস্বত্ব সংরক্ষিত।","© Khobordekho. All rights reserved."],none:["এখনো কোনো খবর পাওয়া যায়নি।","No news found yet."],back:["← প্রচ্ছদে ফিরুন","← Back to home"],all:["সব দেখুন →","View all →"],share:["শেয়ার করুন:","Share:"],copy:["লিংক কপি","Copy link"],copied:["কপি হয়েছে ✓","Copied ✓"],rel:["আরও পড়ুন","Related news"],sr:["অনুসন্ধান: ","Search: "],ph:["খবর খুঁজুন...","Search news..."],views:["বার পড়া হয়েছে","views"]};
+const CATS=[["home","প্রচ্ছদ","Home"],["bd","বাংলাদেশ","Bangladesh"],["pol","রাজনীতি","Politics"],["world","আন্তর্জাতিক","International"],["eco","অর্থনীতি","Economy"],["sport","খেলা","Sports"],["ent","বিনোদন","Entertainment"],["tech","প্রযুক্তি","Technology"],["edu","শিক্ষা","Education"],["jobs","চাকরি","Jobs"],["op","মতামত","Opinion"],["life","লাইফস্টাইল","Lifestyle"]];
+const S={tag:["সত্য ও নিরপেক্ষ সংবাদের বিশ্বস্ত ঠিকানা","Your trusted source for truthful news"],bk:["শিরোনাম","BREAKING"],t0:["সর্বশেষ","Latest"],t1:["জনপ্রিয়","Popular"],cp:["© খবরদেখো। সর্বস্বত্ব সংরক্ষিত।","© Khobordekho. All rights reserved."],none:["এখনো কোনো খবর পাওয়া যায়নি।","No news found yet."],back:["← প্রচ্ছদে ফিরুন","← Back to home"],all:["সব দেখুন →","View all →"],share:["শেয়ার করুন:","Share:"],copy:["লিংক কপি","Copy link"],copied:["কপি হয়েছে ✓","Copied ✓"],rel:["আরও পড়ুন","Related news"],sr:["অনুসন্ধান: ","Search: "],ph:["খবর খুঁজুন...","Search news..."],views:["বার পড়া হয়েছে","views"],org:["প্রতিষ্ঠান","Organization"],dead:["আবেদনের শেষ তারিখ","Deadline"],apply:["আবেদন করুন","Apply now"],exp:["মেয়াদ শেষ","Expired"]};
 const $=id=>document.getElementById(id);
 let L=localStorage.getItem('kd_l')||'bn',th=localStorage.getItem('kd_t')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'),DATA=null,ART={},tab=0;
 const i=()=>L=='bn'?0:1,bn=n=>L=='bn'?String(n).replace(/\d/g,d=>'০১২৩৪৫৬৭৮৯'[d]):n;
@@ -92,9 +93,14 @@ const t=(a,k)=>(L=='en'&&a[k+'_en'])||a[k]||'';
 const cn=k=>{const c=CATS.find(c=>c[0]==k);return c?c[i()+1]:''};
 const loc=()=>L=='bn'?'bn-BD':'en-GB';
 const ago=a=>{const m=Math.max(1,Math.floor((Date.now()-new Date(a.date))/6e4));let n,u;if(m<60){n=m;u=['মিনিট','min']}else if(m<1440){n=Math.floor(m/60);u=['ঘণ্টা','hr']}else{n=Math.floor(m/1440);u=['দিন','day']}return L=='bn'?bn(n)+' '+u[0]+' আগে':n+' '+u[1]+(n>1&&u[1]!='min'?'s':'')+' ago'};
+const dl=a=>a.deadline?new Date(a.deadline+'T23:59:59'):null;
+const dfmt=a=>dl(a).toLocaleDateString(loc(),{day:'numeric',month:'long',year:'numeric'});
+const left=a=>{const n=Math.ceil((dl(a)-Date.now())/864e5);return n<0?S.exp[i()]:(L=='bn'?bn(n)+' দিন বাকি':n+' day'+(n>1?'s':'')+' left')};
+const jb=a=>a.cat=='jobs'&&(a.company||a.company_en||a.deadline)?`<div class="job">${a.company||a.company_en?`<span>🏢 ${esc(t(a,'company'))}</span>`:''}${a.deadline?`<span>⏳ ${dfmt(a)}</span>`:''}</div>`:'';
+const jbox=a=>{if(a.cat!='jobs'||!(a.company||a.company_en||a.deadline||a.apply_url))return'';const ok=/^https?:\/\//.test(a.apply_url||'');return `<div class="jbox">${a.company||a.company_en?`<div><b>${S.org[i()]}:</b> ${esc(t(a,'company'))}</div>`:''}${a.deadline?`<div><b>${S.dead[i()]}:</b> ${dfmt(a)} <span class="chip">${left(a)}</span></div>`:''}${ok?`<a class="apply" target="_blank" rel="noopener" href="${esc(a.apply_url)}">${S.apply[i()]} →</a>`:''}</div>`};
 const pic=a=>`<div class="img ${a.image?'':'noimg'}">${a.image?`<img src="${esc(a.image)}" loading="lazy" alt="">`:''}</div>`;
 const chip=a=>`<span class="chip">${cn(a.cat)}</span>`;
-const card=(a,n)=>`<a class="card" style="animation-delay:${n*60}ms" href="#/a/${a.id}">${pic(a)}<div class="b">${chip(a)}<h3>${esc(t(a,'title'))}</h3><p>${esc(t(a,'desc'))}</p><span class="meta">🕒 ${ago(a)}</span></div></a>`;
+const card=(a,n)=>`<a class="card" style="animation-delay:${n*60}ms" href="#/a/${a.id}">${pic(a)}<div class="b">${chip(a)}<h3>${esc(t(a,'title'))}</h3><p>${esc(t(a,'desc'))}</p>${jb(a)}<span class="meta">🕒 ${ago(a)}</span></div></a>`;
 const mini=a=>`<a class="mini" href="#/a/${a.id}">${pic(a)}<div><h4>${esc(t(a,'title'))}</h4><span class="meta">${cn(a.cat)} · ${ago(a)}</span></div></a>`;
 const sec=(c,more)=>`<div class="sec"><h2>${c}</h2>${more?`<a href="#/c/${more}">${S.all[i()]}</a>`:''}</div>`;
 function side(){
@@ -118,7 +124,7 @@ async function route(){
     if(!a||a.error)h=`<div class="empty">404</div>`;
     else{document.title=t(a,'title')+' | খবরদেখো';const u=encodeURIComponent(location.href),tt=encodeURIComponent(t(a,'title'));
       const rel=DATA.filter(x=>x.cat==a.cat&&x.id!=a.id).slice(0,3);
-      h=`<article class="art"><a href="#/" class="back">${S.back[i()]}</a><div style="margin-top:12px">${chip(a)} <span class="meta">${new Date(a.date).toLocaleDateString(loc(),{day:'numeric',month:'long',year:'numeric'})} · ${ago(a)} · 👁 ${bn(a.views||0)}</span></div><h1>${esc(t(a,'title'))}</h1>${t(a,'desc')?`<p class="lede">${esc(t(a,'desc'))}</p>`:''}${a.image?`<div class="img"><img src="${esc(a.image)}" alt=""></div>`:''}<div class="body">${esc(t(a,'content')).split(/\n\s*\n/).filter(x=>x.trim()).map(x=>`<p>${x.replace(/\n/g,'<br>')}</p>`).join('')}</div>
+      h=`<article class="art"><a href="#/" class="back">${S.back[i()]}</a><div style="margin-top:12px">${chip(a)} <span class="meta">${new Date(a.date).toLocaleDateString(loc(),{day:'numeric',month:'long',year:'numeric'})} · ${ago(a)} · 👁 ${bn(a.views||0)}</span></div><h1>${esc(t(a,'title'))}</h1>${t(a,'desc')?`<p class="lede">${esc(t(a,'desc'))}</p>`:''}${a.image?`<div class="img"><img src="${esc(a.image)}" alt=""></div>`:''}${jbox(a)}<div class="body">${esc(t(a,'content')).split(/\n\s*\n/).filter(x=>x.trim()).map(x=>`<p>${x.replace(/\n/g,'<br>')}</p>`).join('')}</div>
       <div class="share"><b>${S.share[i()]}</b><a target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${u}">Facebook</a><a target="_blank" rel="noopener" href="https://wa.me/?text=${tt}%20${u}">WhatsApp</a><button id="cpy">${S.copy[i()]}</button></div></article>${rel.length?sec(S.rel[i()])+`<div class="cards">${rel.map(card).join('')}</div>`:''}`}
   }else if(isS){
     const q=decodeURIComponent(p[1]||'').toLowerCase(),r=DATA.filter(a=>[a.title,a.title_en,a.desc,a.desc_en].join(' ').toLowerCase().includes(q));
