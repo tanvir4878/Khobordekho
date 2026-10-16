@@ -4,7 +4,7 @@ const J = (d, s = 200) => new Response(JSON.stringify(d), { status: s, headers: 
 const auth = r => { const p = (process.env.ADMIN_PASSWORD || "").trim(); return p && (r.headers.get("x-admin-password") || "").trim() === p; };
 const load = async () => (await store().get("articles", { type: "json" })) || [];
 const save = a => store().setJSON("articles", a);
-const FIELDS = ["cat","title","title_en","desc","desc_en","content","content_en","image","featured"];
+const FIELDS = ["cat","title","title_en","desc","desc_en","content","content_en","image","featured","company","company_en","deadline","apply_url"];
 const pick = b => Object.fromEntries(FIELDS.filter(k => k in b).map(k => [k, b[k]]));
 
 export default async (req) => {
@@ -12,7 +12,7 @@ export default async (req) => {
   const id = url.searchParams.get("id");
   let all = await load();
   if (req.method === "GET") {
-if (url.searchParams.get("check")) return J({ ok: !!auth(req), envSet: !!process.env.ADMIN_PASSWORD });
+    if (url.searchParams.get("check")) return J({ ok: !!auth(req), envSet: !!process.env.ADMIN_PASSWORD });
     if (id) {
       const a = all.find(x => x.id === id);
       if (!a) return J({ error: "not found" }, 404);
